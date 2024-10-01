@@ -14,11 +14,14 @@ class TypedArgument:
 
 def retrieve_parameters(query_arguments: List[TypedArgument]):
     values = []
-    for arg in query_arguments:
-        value = request.args.get(arg.name, type=arg.type_)
-        if not value:
-            return make_response("Invalid input\n", 400)  # HTTP 400 BAD REQUEST
-        values.append(value)
+    try:
+        for arg in query_arguments:
+            value = request.args.get(arg.name, type=arg.type_)
+            if not value:
+                return make_response("Invalid input\n", 400)  # HTTP 400 BAD REQUEST
+            values.append(value)
+    except ValueError:
+        return make_response("Invalid input\n", 400)
     if len(values) == 1:
         return values[0]
     return tuple(values)
@@ -26,54 +29,42 @@ def retrieve_parameters(query_arguments: List[TypedArgument]):
 
 @app.route("/add")
 def add():
-    a, b = retrieve_parameters(
-        [TypedArgument("a", float), TypedArgument("b", float)]
-    )
+    a, b = retrieve_parameters([TypedArgument("a", float), TypedArgument("b", float)])
     return make_response(jsonify(s=a + b), 200)  # HTTP 200 OK
 
 
 # Endpoint /sub for subtraction which takes a and b as query parameters.
 @app.route("/sub")
 def sub():
-    a, b = retrieve_parameters(
-        [TypedArgument("a", float), TypedArgument("b", float)]
-    )
+    a, b = retrieve_parameters([TypedArgument("a", float), TypedArgument("b", float)])
     return make_response(jsonify(s=a - b), 200)  # HTTP 200 OK
 
 
 # Endpoint /mul for multiplication which takes a and b as query parameters.
 @app.route("/mul")
 def mul():
-    a, b = retrieve_parameters(
-        [TypedArgument("a", float), TypedArgument("b", float)]
-    )
+    a, b = retrieve_parameters([TypedArgument("a", float), TypedArgument("b", float)])
     return make_response(jsonify(s=a * b), 200)  # HTTP 200 OK
 
 
 # Endpoint /div for division which takes a and b as query parameters. Returns HTTP 400 BAD REQUEST also for division by zero.
 @app.route("/div")
 def div():
-    a, b = retrieve_parameters(
-        [TypedArgument("a", float), TypedArgument("b", float)]
-    )
+    a, b = retrieve_parameters([TypedArgument("a", float), TypedArgument("b", float)])
     return make_response(jsonify(s=a * b), 200)  # HTTP 200 OK
 
 
 # Endpoint /mod for modulo which takes a and b as query parameters. Returns HTTP 400 BAD REQUEST also for division by zero.
 @app.route("/mod")
 def mod():
-    a, b = retrieve_parameters(
-        [TypedArgument("a", float), TypedArgument("b", float)]
-    )
+    a, b = retrieve_parameters([TypedArgument("a", float), TypedArgument("b", float)])
     return make_response(jsonify(s=a % b), 200)  # HTTP 200 OK
 
 
 # Endpoint /random which takes a and b as query parameters and returns a random number between a and b included. Returns HTTP 400 BAD REQUEST if a is greater than b.
 @app.route("/random")
 def random():
-    a, b = retrieve_parameters(
-        [TypedArgument("a", float), TypedArgument("b", float)]
-    )
+    a, b = retrieve_parameters([TypedArgument("a", float), TypedArgument("b", float)])
     if a > b:
         return make_response("Invalid input\n", 400)
     return make_response(jsonify(s=random_utils.uniform(a, b)), 200)  # HTTP 200 OK
@@ -82,32 +73,22 @@ def random():
 # upper which given the string a it returns it in a JSON all in uppercase.
 @app.route("/upper")
 def upper():
-    try:
-        a = retrieve_parameters(
-            [TypedArgument("a", str)]
-        )
-    except ValueError:
-        return make_response("Invalid input\n", 400)
+    a = retrieve_parameters([TypedArgument("a", str)])
+
     return make_response(jsonify(s=a.upper()), 200)
 
 
 # lower which given the string a it returns it in a JSON all in lowercase.
 @app.route("/lower")
 def lower():
-    try:
-        a = retrieve_parameters(
-            [TypedArgument("a", str)]
-        )
-    except ValueError:
-        return make_response("Invalid input\n", 400)
+    a = retrieve_parameters([TypedArgument("a", str)])
     return make_response(jsonify(s=a.lower()), 200)
+
 
 # concat which given the strings a and b it returns in a JSON the concatenation of them.
 @app.route("/concat")
 def concat():
-    a, b = retrieve_parameters(
-        [TypedArgument("a", str), TypedArgument("b", str)]
-    )
+    a, b = retrieve_parameters([TypedArgument("a", str), TypedArgument("b", str)])
     return make_response(jsonify(s=a + b), 200)  # HTTP 200 OK
 
 
